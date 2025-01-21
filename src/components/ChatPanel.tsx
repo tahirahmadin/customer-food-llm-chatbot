@@ -1,88 +1,54 @@
-import React from "react";
-import { Message } from "./Message";
-import { ChatInput } from "./ChatInput";
+// src/components/ChatPanel.tsx
+import React, { useRef, useEffect } from 'react';
+import { Message } from './Message';
+import { ChatInput } from './ChatInput';
+import { useChatContext } from '../context/ChatContext';
 
 interface ChatPanelProps {
-  messages: any[];
-  messageCards: { [key: number]: any[] };
-  quantities: { [key: number]: number };
-  peopleCount: number;
-  orderDetails: any;
   input: string;
   setInput: (value: string) => void;
-  setOrderDetails: (details: any) => void;
-  onQuantityChange: (id: number, change: number) => void;
-  onRemoveCard: (messageId: number, cardId: number) => void;
-  onGenerateNewCards: (messageId: number) => void;
-  onCheckout: (messageId: number) => void;
-  calculateTotal: (cards: any[]) => string;
-  onDetailsSubmit: (e: React.FormEvent) => void;
-  onPaymentSubmit: (e: React.FormEvent) => void;
   onSubmit: (e: React.FormEvent) => void;
-  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const ChatPanel: React.FC<ChatPanelProps> = ({
-  messages,
-  messageCards,
-  quantities,
-  peopleCount,
-  orderDetails,
   input,
   setInput,
-  setOrderDetails,
-  onQuantityChange,
-  onRemoveCard,
-  onGenerateNewCards,
-  onCheckout,
-  calculateTotal,
-  onDetailsSubmit,
-  onPaymentSubmit,
   onSubmit,
-  onImageUpload,
 }) => {
-  const chatContainerRef = React.useRef<HTMLDivElement>(null);
+  const { state } = useChatContext();
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Auto scroll to bottom
-  React.useEffect(() => {
+  useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [messages, messageCards]);
+  }, [state.messages]);
 
   return (
     <>
-      {/* Chat Messages */}
       <div
         ref={chatContainerRef}
         className="h-[500px] overflow-y-auto p-4 bg-white/30 backdrop-blur-sm scroll-smooth"
       >
-        {messages.map((message) => (
+        {state.messages.map((message) => (
           <Message
             key={message.id}
             message={message}
-            messageCards={messageCards}
-            quantities={quantities}
-            peopleCount={peopleCount}
-            orderDetails={orderDetails}
-            setOrderDetails={setOrderDetails}
-            onQuantityChange={onQuantityChange}
-            onRemoveCard={onRemoveCard}
-            onGenerateNewCards={onGenerateNewCards}
-            onCheckout={onCheckout}
-            calculateTotal={calculateTotal}
-            onDetailsSubmit={onDetailsSubmit}
-            onPaymentSubmit={onPaymentSubmit}
           />
         ))}
+        {state.isLoading && (
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+          </div>
+        )}
       </div>
 
       <ChatInput
         input={input}
         setInput={setInput}
         onSubmit={onSubmit}
-        onImageUpload={onImageUpload}
+        isLoading={state.isLoading}
       />
     </>
   );

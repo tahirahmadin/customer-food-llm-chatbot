@@ -1,98 +1,62 @@
+// src/components/Message.tsx
 import React from 'react';
-import { MenuList } from './MenuList';
-import { CheckoutForm } from './CheckoutForm';
+import { Message as MessageType } from '../types';
+import { AlertTriangle } from 'lucide-react';
 
 interface MessageProps {
-  message: any;
-  messageCards: { [key: number]: any[] };
-  quantities: { [key: number]: number };
-  peopleCount: number;
-  orderDetails: any;
-  setOrderDetails: (details: any) => void;
-  onQuantityChange: (id: number, change: number) => void;
-  onRemoveCard: (messageId: number, cardId: number) => void;
-  onGenerateNewCards: (messageId: number) => void;
-  onCheckout: (messageId: number) => void;
-  calculateTotal: (cards: any[]) => string;
-  onDetailsSubmit: (e: React.FormEvent) => void;
-  onPaymentSubmit: (e: React.FormEvent) => void;
+  message: MessageType;
+  onRetry: () => void;
 }
 
-export const Message: React.FC<MessageProps> = ({
-  message,
-  messageCards,
-  quantities,
-  peopleCount,
-  orderDetails,
-  setOrderDetails,
-  onQuantityChange,
-  onRemoveCard,
-  onGenerateNewCards,
-  onCheckout,
-  calculateTotal,
-  onDetailsSubmit,
-  onPaymentSubmit
-}) => {
+export const Message: React.FC<MessageProps> = ({ message, onRetry }) => {
+  const isError = message.text.toLowerCase().includes('error') || message.text.toLowerCase().includes('sorry');
+
   return (
     <div className={`mb-4 flex ${message.isBot ? 'justify-start' : 'justify-end'}`}>
-      <div className={`max-w-[80%] rounded-2xl p-3 ${
-        message.isBot
-          ? 'bg-white/80 shadow-sm backdrop-blur-sm'
-          : 'bg-orange-500 text-white'
-      }`}>
-        {message.text && <p>{message.text}</p>}
+      <div
+        className={`max-w-[80%] rounded-2xl p-3 ${
+          message.isBot
+            ? isError 
+              ? 'bg-red-50 text-red-700' 
+              : 'bg-white/80 shadow-sm backdrop-blur-sm'
+            : 'bg-orange-500 text-white'
+        }`}
+      >
+        {message.text && (
+          <div className="flex items-start gap-2">
+            {isError && message.isBot && (
+              <AlertTriangle className="w-4 h-4 mt-1 flex-shrink-0" />
+            )}
+            <p>{message.text}</p>
+          </div>
+        )}
+        
         {message.image && (
           <img 
             src={message.image} 
             alt="Uploaded" 
-            className="max-w-full rounded-lg mb-2"
+            className="max-w-full rounded-lg my-2"
           />
         )}
-        {message.mealCards && (
-          <MenuList
-            messageId={message.id}
-            items={messageCards[message.id] || []}
-            quantities={quantities}
-            peopleCount={peopleCount}
-            onQuantityChange={onQuantityChange}
-            onRemoveCard={onRemoveCard}
-            onGenerateNewCards={onGenerateNewCards}
-            onCheckout={onCheckout}
-            calculateTotal={calculateTotal}
-          />
-        )}
-        {message.checkout?.step === 'details' && (
-          <CheckoutForm
-            step="details"
-            orderDetails={orderDetails}
-            setOrderDetails={setOrderDetails}
-            onSubmit={onDetailsSubmit}
-          />
-        )}
-        {message.checkout?.step === 'payment' && (
-          <CheckoutForm
-            step="payment"
-            orderDetails={orderDetails}
-            setOrderDetails={setOrderDetails}
-            onSubmit={onPaymentSubmit}
-            total={message.checkout.total}
-          />
-        )}
-        {message.options && (
-          <div className="mt-3 space-y-2">
-            {message.options.map((option: string) => (
-              <button
-                key={option}
-                className="block w-full text-left p-3 rounded-lg bg-white/50 hover:bg-white/70 transition-colors backdrop-blur-sm"
-              >
-                {option}
-              </button>
-            ))}
+
+        {message.mealCards && message.isBot && (
+          <div className="mt-4">
+            {/* Render meal cards here if needed */}
           </div>
         )}
+
         <span className="text-xs text-gray-500 mt-1 block">
           {message.time}
         </span>
+
+        {isError && message.isBot && (
+          <button
+            onClick={onRetry}
+            className="mt-2 text-sm text-orange-500 hover:text-orange-600 transition-colors"
+          >
+            Try again
+          </button>
+        )}
       </div>
     </div>
   );
