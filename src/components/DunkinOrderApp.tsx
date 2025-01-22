@@ -6,6 +6,7 @@ import { Header } from './Header';
 import { Filters } from './Filters';
 import { ChatPanel } from './ChatPanel';
 import { SlidePanel } from './SlidePanel';
+import { QueryType } from '../context/ChatContext';
 import { config } from '../config';
 
 const chatService = new ChatService();
@@ -21,30 +22,50 @@ export const DunkinOrderApp: React.FC = () => {
     e.preventDefault();
     if (!input.trim()) return;
 
+    // Determine query type
+    const queryType = chatService.determineQueryType(input.trim());
+
+    // Create user message with query type
     const userMessage = {
       id: Date.now(),
       text: input.trim(),
       isBot: false,
       time: new Date().toLocaleTimeString(),
+      queryType, // Include query type in message
     };
 
+    // Update state
     dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
+    dispatch({ type: 'SET_QUERY_TYPE', payload: queryType });
     setInput('');
     dispatch({ type: 'SET_LOADING', payload: true });
 
     try {
+      // Get response from chat service
       const response = await chatService.queryMenu(input);
-      
+
+      // Create bot message
       const botMessage = {
         id: Date.now() + 1,
         text: response.response,
         isBot: true,
         time: new Date().toLocaleTimeString(),
+        queryType, // Keep the same query type for the response
       };
 
+      // Add bot message to chat
       dispatch({ type: 'ADD_MESSAGE', payload: botMessage });
+
+      // Handle menu items if present in response
+      if (response.menuItems) {
+        // You could add additional handling here for menu items
+        // For example, showing them in a different UI component
+        console.log('Menu items:', response.menuItems);
+      }
     } catch (error) {
       console.error('Error querying menu:', error);
+      
+      // Add error message
       dispatch({
         type: 'ADD_MESSAGE',
         payload: {
@@ -52,6 +73,7 @@ export const DunkinOrderApp: React.FC = () => {
           text: 'Sorry, I had trouble understanding your question. Please try again.',
           isBot: true,
           time: new Date().toLocaleTimeString(),
+          queryType: QueryType.GENERAL, 
         },
       });
     } finally {
@@ -59,10 +81,23 @@ export const DunkinOrderApp: React.FC = () => {
     }
   };
 
+  // Helper function to get appropriate placeholder text based on current query type
+  const getInputPlaceholder = () => {
+    switch (state.currentQueryType) {
+      case QueryType.MENU_QUERY:
+        return "Ask about menu items, prices, or place an order...";
+      default:
+        return "Type your message here...";
+    }
+  };
+
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 bg-[#E0E0E0]">
       <div className="relative bg-white/70 backdrop-blur-md rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-white/20">
-        <Header onOpenPanel={() => setIsPanelOpen(true)} />
+        <Header 
+          onOpenPanel={() => setIsPanelOpen(true)}
+          queryType={state.currentQueryType} 
+        />
         
         <Filters
           isVegOnly={isVegOnly}
@@ -75,7 +110,10 @@ export const DunkinOrderApp: React.FC = () => {
           input={input}
           setInput={setInput}
           onSubmit={handleSubmit}
-          onImageUpload={() => {}} // Not needed anymore
+          placeholder={getInputPlaceholder()} 
+          onImageUpload={() => {}}
+          isLoading={state.isLoading} 
+          queryType={state.currentQueryType} 
         />
       </div>
 
