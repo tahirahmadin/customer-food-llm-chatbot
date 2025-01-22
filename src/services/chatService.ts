@@ -1,7 +1,7 @@
 // src/services/chatService.ts
-import { QueryType } from '../context/ChatContext';
-import { MenuItem } from '../types/menu';
-import { menuItems } from '../data/menuData';
+import { QueryType } from "../context/ChatContext";
+import { MenuItem } from "../types/menu";
+import { menuItems } from "../data/menuData";
 
 interface ChatResponse {
   response: string;
@@ -50,27 +50,47 @@ export class ChatService {
   }
 
   private determineQueryType(query: string): QueryType {
-    console.log('\n=== Query Type Determination ===');
-    console.log('Original Query:', query);
+    console.log("\n=== Query Type Determination ===");
+    console.log("Original Query:", query);
 
-    const menuKeywords = ['price', 'cost', 'how much', 'menu', 'order', 'buy', 'get',
-      'recommend', 'suggest', 'what should', 'what\'s good', 'suggestion', 'spicy', 'veg', 
-      'non veg', 'party', 'best', 'popular', 'favorite', 'special'
+    const menuKeywords = [
+      "price",
+      "cost",
+      "how much",
+      "menu",
+      "order",
+      "buy",
+      "get",
+      "recommend",
+      "suggest",
+      "what should",
+      "what's good",
+      "suggestion",
+      "spicy",
+      "veg",
+      "non veg",
+      "party",
+      "best",
+      "popular",
+      "favorite",
+      "special",
     ];
 
     query = query.toLowerCase();
-    console.log('Lowercase Query:', query);
+    console.log("Lowercase Query:", query);
 
-    console.log('\nChecking Menu Keywords:', menuKeywords);
-    const matchedMenuKeywords = menuKeywords.filter(keyword => query.includes(keyword));
-    console.log('Matched Menu Keywords:', matchedMenuKeywords);
+    console.log("\nChecking Menu Keywords:", menuKeywords);
+    const matchedMenuKeywords = menuKeywords.filter((keyword) =>
+      query.includes(keyword)
+    );
+    console.log("Matched Menu Keywords:", matchedMenuKeywords);
 
     if (matchedMenuKeywords.length > 0) {
-      console.log('➡️ Determined Type: MENU_QUERY');
+      console.log("➡️ Determined Type: MENU_QUERY");
       return QueryType.MENU_QUERY;
     }
-    
-    console.log('➡️ Determined Type: GENERAL');
+
+    console.log("➡️ Determined Type: GENERAL");
     return QueryType.GENERAL;
   }
 
@@ -81,11 +101,11 @@ export class ChatService {
       }
 
       const queryType = this.determineQueryType(query);
-      console.log('Query Type:', queryType);
+      console.log("Query Type:", queryType);
 
       if (queryType === QueryType.MENU_QUERY) {
         // For menu queries, always use the backend
-        console.log('Fetching from backend URL:', this.queryUrl);
+        console.log("Fetching from backend URL:", this.queryUrl);
         const milvusResponse = await fetch(this.queryUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -96,15 +116,15 @@ export class ChatService {
         });
 
         if (!milvusResponse.ok) {
-          throw new Error('Backend query failed');
+          throw new Error("Backend query failed");
         }
 
         const milvusData: MilvusResponse = await milvusResponse.json();
         const menuContext = this.extractMenuContext(milvusData);
-        
+
         if (!menuContext.trim()) {
           return {
-            response: "I couldn't find any menu items matching your query."
+            response: "I couldn't find any menu items matching your query.",
           };
         }
 
@@ -112,18 +132,21 @@ export class ChatService {
         return { response: await this.getOpenAIResponse(query, menuContext) };
       } else {
         // For general queries, use OpenAI without menu context
-        return { response: await this.getOpenAIResponse(query, '') };
+        return { response: await this.getOpenAIResponse(query, "") };
       }
-
     } catch (error) {
       console.error("Error in queryMenu:", error);
       return {
-        response: "I apologize, but there was an error processing your request."
+        response:
+          "I apologize, but there was an error processing your request.",
       };
     }
   }
 
-  private async getOpenAIResponse(query: string, menuContext: string): Promise<string> {
+  private async getOpenAIResponse(
+    query: string,
+    menuContext: string
+  ): Promise<string> {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -148,7 +171,7 @@ export class ChatService {
     });
 
     if (!response.ok) {
-      throw new Error('OpenAI API request failed');
+      throw new Error("OpenAI API request failed");
     }
 
     const data = await response.json();
@@ -165,21 +188,35 @@ export class ChatService {
 
     // For menu queries with context
     return `You are a helpful and friendly assistant for a Dunkin' Donuts restaurant. 
-    When responding to questions about menu items:
-    1. Be friendly and conversational
-    2. Include specific menu items with their prices when relevant
-    3. For menu queries, respond with both the item name and its price
-    4. If the query is about recommendations or suggestions, explain why you're recommending those items
 
-    Available Menu Items:
-    ${menuContext}
+When responding to questions about menu items:
+1. Be friendly and conversational.
+2. Include specific menu items with their prices when relevant.
+3. For menu queries, respond with both the item name and its price.
+4. If the query is about recommendations or suggestions, explain why you're recommending those items.
+5. For menu queries, Always return the response in the following JSON format:
 
-    Current Query: ${query}`;
+{
+  "start": "Friendly introduction and opening text here.",
+  "menu": [
+    { "name": "Item Name 1 only name", "price": "Item Price 1 in numbers, not currency" },
+    { "name": "Item Name 2 only name", "price": "Item Price 2 in numbers, not currency" },
+    ...
+  ],
+  "end": "Recommendations, suggestions, or closing text here."
+}
+
+5. For general queries, Return response as you like
+
+Available Menu Items:
+${menuContext}
+
+Current Query: ${query}`;
   }
 
   private extractMenuContext(milvusData: MilvusResponse): string {
-    console.log('Extracting menu context from backend response');
-    
+    console.log("Extracting menu context from backend response");
+
     const resultsExtractionStrategies = [
       () => milvusData.response?.results,
       () => milvusData.results,
@@ -193,26 +230,26 @@ export class ChatService {
     }
 
     if (!extractedResults?.length) {
-      console.log('No results found in backend response');
+      console.log("No results found in backend response");
       return "";
     }
 
     const menuContext = extractedResults
-      .map(result => {
+      .map((result) => {
         const text = (result.text || result.content || "").trim();
         const priceMatches = text.match(/AED\s*\d+(\.\d{2})?/g) || [];
-        const prices = priceMatches.map(p => p.trim());
+        const prices = priceMatches.map((p) => p.trim());
         const description = text
           .replace(/AED\s*\d+(\.\d{2})?/g, "")
           .replace(/\s+/g, " ")
           .trim();
         return prices.length > 0 ? `${prices[0]} ${description}` : description;
       })
-      .filter(item => item.length > 0)
+      .filter((item) => item.length > 0)
       .filter((item, index, self) => self.indexOf(item) === index)
       .join("\n");
 
-    console.log('Extracted menu context length:', menuContext.length);
+    console.log("Extracted menu context length:", menuContext.length);
     return menuContext;
   }
 }
