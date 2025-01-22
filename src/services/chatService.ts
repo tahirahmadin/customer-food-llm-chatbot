@@ -192,26 +192,29 @@ export class ChatService {
 When responding to questions about menu items:
 1. Be friendly and conversational.
 2. Include specific menu items with their prices when relevant.
-3. For menu queries, respond with both the item name and its price.
+3. For menu queries, respond with the item ID, name, and price.
 4. If the query is about recommendations or suggestions, explain why you're recommending those items.
-5. For menu queries, Always return the response in the following JSON format:
+5. For menu queries, always return the response in the following JSON format:
 
 {
   "start": "Friendly introduction and opening text here.",
   "menu": [
-    { "name": "Item Name 1 only name", "price": "Item Price 1 in numbers, not currency" },
-    { "name": "Item Name 2 only name", "price": "Item Price 2 in numbers, not currency" },
+    { "id": "Item 1 ID from menu object definition", "name": "Item Name 1 only name", "price": "Item Price 1 in numbers, not currency",quantity:"quantity to fulfil" },
+    { "id": "Item 2 ID from menu object definition", "name": "Item Name 2 only name", "price": "Item Price 2 in numbers, not currency",quantity:"quantity to fulfil" },
     ...
   ],
   "end": "Recommendations, suggestions, or closing text here."
 }
 
-5. For general queries, Return response as you like
+6. For general queries, return the response as you like.
+
+7. Always ensure the id, name, and price in the menu array match the available menu context.
 
 Available Menu Items:
 ${menuContext}
 
-Current Query: ${query}`;
+Current Query: ${query}
+`;
   }
 
   private extractMenuContext(milvusData: MilvusResponse): string {

@@ -56,6 +56,9 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
           return message;
         }
       });
+
+      console.log("result");
+      console.log(result);
       return result;
     } else {
       return [];
@@ -72,8 +75,6 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
           <Message key={message.id} message={message} onRetry={() => {}} />
         ))}
 
-        {console.log("cleanMessages")}
-        {console.log(cleanMessages)}
         {state.isLoading && (
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
