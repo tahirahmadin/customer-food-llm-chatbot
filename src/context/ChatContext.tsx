@@ -1,5 +1,5 @@
 // src/context/ChatContext.tsx
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer } from "react";
 
 interface Message {
   id: number;
@@ -14,30 +14,30 @@ interface ChatState {
   error: string | null;
 }
 
-type ChatAction = 
-  | { type: 'ADD_MESSAGE'; payload: Message }
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'CLEAR_MESSAGES' };
+type ChatAction =
+  | { type: "ADD_MESSAGE"; payload: Message }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null }
+  | { type: "CLEAR_MESSAGES" };
 
 const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
   switch (action.type) {
-    case 'ADD_MESSAGE':
+    case "ADD_MESSAGE":
       return {
         ...state,
         messages: [...state.messages, action.payload],
       };
-    case 'SET_LOADING':
+    case "SET_LOADING":
       return {
         ...state,
         isLoading: action.payload,
       };
-    case 'SET_ERROR':
+    case "SET_ERROR":
       return {
         ...state,
         error: action.payload,
       };
-    case 'CLEAR_MESSAGES':
+    case "CLEAR_MESSAGES":
       return {
         ...state,
         messages: [],
@@ -65,7 +65,9 @@ const ChatContext = createContext<{
   dispatch: React.Dispatch<ChatAction>;
 } | null>(null);
 
-export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [state, dispatch] = useReducer(chatReducer, initialState);
 
   return (
@@ -78,7 +80,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useChatContext = () => {
   const context = useContext(ChatContext);
   if (!context) {
-    throw new Error('useChatContext must be used within a ChatProvider');
+    throw new Error("useChatContext must be used within a ChatProvider");
   }
   return context;
 };
