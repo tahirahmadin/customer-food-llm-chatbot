@@ -1,5 +1,5 @@
 // src/components/DunkinOrderApp.tsx
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useChatContext } from "../context/ChatContext";
 import { ChatService } from "../services/chatService";
 import { Header } from "./Header";
@@ -18,7 +18,18 @@ export const DunkinOrderApp: React.FC = () => {
   const [peopleCount, setPeopleCount] = useState(1);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Serialize previous messages for memory context
+  const serializedMemory = useMemo(() => {
+    return state.messages
+      .map((message) =>
+        message.isBot
+          ? `Bot: ${message.text}`
+          : `User: ${message.text}`
+      )
+      .join("\n");
+  }, [state.messages]);
+
+  const handleSubmit = async (e: React.FormEvent, serializedMemory: string) => {
     e.preventDefault();
     if (!input.trim()) return;
 
@@ -49,8 +60,7 @@ export const DunkinOrderApp: React.FC = () => {
     dispatch({ type: "SET_LOADING", payload: true });
 
     try {
-      // Get response from chat service
-      const response = await chatService.queryMenu(inputQueryTrim);
+      const response = await chatService.queryMenu(inputQueryTrim, serializedMemory);
 
       // Create bot message
       const botMessage = {

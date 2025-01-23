@@ -7,13 +7,15 @@ import { useChatContext } from "../context/ChatContext";
 interface ChatPanelProps {
   input: string;
   setInput: (value: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-}
+  onSubmit: (e: React.FormEvent, serializedMemory: string) => void; 
+  placeholder: string;
+} 
 
 export const ChatPanel: React.FC<ChatPanelProps> = ({
   input,
   setInput,
   onSubmit,
+  placeholder,
 }) => {
   const { state } = useChatContext();
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -26,6 +28,18 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     }
   }, [state.messages]);
 
+  // Serialize messages for maintaining memory context
+  const serializedMemory = useMemo(() => {
+    return state.messages
+      .map((message) =>
+        message.isBot
+          ? `Bot: ${message.text}`
+          : `User: ${message.text}`
+      )
+      .join("\n");
+  }, [state.messages]);
+
+  // Use cleanMessages without modification
   const cleanMessages = useMemo(() => {
     if (state.messages?.length > 0) {
       let result = state.messages.map((message) => {
@@ -65,6 +79,12 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     }
   }, [state.messages]);
 
+  // Handle submit and pass serialized memory
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(e, serializedMemory); // Pass serialized memory along with form submission
+  };
+
   return (
     <>
       <div
@@ -85,7 +105,8 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
       <ChatInput
         input={input}
         setInput={setInput}
-        onSubmit={onSubmit}
+        onSubmit={handleSubmit}
+        placeholder={placeholder}
         isLoading={state.isLoading}
       />
     </>

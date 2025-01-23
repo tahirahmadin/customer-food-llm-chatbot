@@ -94,7 +94,7 @@ export class ChatService {
     return QueryType.GENERAL;
   }
 
-  async queryMenu(query: string): Promise<ChatResponse> {
+  public async queryMenu(query: string, serializedMemory: string = ""): Promise<ChatResponse> {
     try {
       if (!query || typeof query !== "string") {
         throw new Error("Invalid query provided");
@@ -129,10 +129,10 @@ export class ChatService {
         }
 
         // Get response from OpenAI with menu context
-        return { response: await this.getOpenAIResponse(query, menuContext) };
+        return { response: await this.getOpenAIResponse(query, menuContext,serializedMemory) };
       } else {
         // For general queries, use OpenAI without menu context
-        return { response: await this.getOpenAIResponse(query, "") };
+        return { response: await this.getOpenAIResponse(query, "",serializedMemory), };
       }
     } catch (error) {
       console.error("Error in queryMenu:", error);
@@ -145,8 +145,12 @@ export class ChatService {
 
   private async getOpenAIResponse(
     query: string,
-    menuContext: string
+    menuContext: string,
+    serializedMemory: string
   ): Promise<string> {
+    console.log("Serialized Memory:", serializedMemory);
+    console.log("System Prompt:", this.createSystemPrompt(menuContext, query, serializedMemory));
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -158,7 +162,7 @@ export class ChatService {
         messages: [
           {
             role: "system",
-            content: this.createSystemPrompt(menuContext, query),
+            content: this.createSystemPrompt(menuContext, query, serializedMemory),
           },
           {
             role: "user",
@@ -178,12 +182,15 @@ export class ChatService {
     return data.choices[0].message.content;
   }
 
-  private createSystemPrompt(menuContext: string, query: string): string {
+  private createSystemPrompt(menuContext: string, query: string, serializedMemory: string): string {
+    const memoryContext = serializedMemory
+      ? `Previous conversation:\n${serializedMemory}\n\n`
+      : "";
     // For general queries without menu context
     if (!menuContext) {
       return `You are a friendly Dunkin' Donuts assistant. Be conversational and helpful.
       Guide customers to ask about specific menu items or make general inquiries about the restaurant.
-      Current query: ${query}`;
+      Current query: ${query}, if needed only , if you think it wants some context from previous conversation then use memory context this is a chat of previos conversation ${memoryContext}`;
     }
 
     // For menu queries with context
@@ -209,6 +216,8 @@ When responding to questions about menu items:
 6. For general queries, return the response as you like.
 
 7. Always ensure the id, name, and price in the menu array match the available menu context.
+
+8. When responding to questions about updating, adding, removing, liking, disliking menu items use previous conversation ${memoryContext} and iterate over it to include items from prervious menu and udate it according to the user query
 
 Available Menu Items:
 ${menuContext}
