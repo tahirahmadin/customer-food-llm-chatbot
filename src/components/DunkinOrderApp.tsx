@@ -22,9 +22,7 @@ export const DunkinOrderApp: React.FC = () => {
   const serializedMemory = useMemo(() => {
     return state.messages
       .map((message) =>
-        message.isBot
-          ? `Bot: ${message.text}`
-          : `User: ${message.text}`
+        message.isBot ? `Bot: ${message.text}` : `User: ${message.text}`
       )
       .join("\n");
   }, [state.messages]);
@@ -60,7 +58,10 @@ export const DunkinOrderApp: React.FC = () => {
     dispatch({ type: "SET_LOADING", payload: true });
 
     try {
-      const response = await chatService.queryMenu(inputQueryTrim, serializedMemory);
+      const response = await chatService.queryMenu(
+        inputQueryTrim,
+        serializedMemory
+      );
 
       // Create bot message
       const botMessage = {
