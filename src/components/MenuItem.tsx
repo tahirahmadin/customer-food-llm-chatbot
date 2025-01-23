@@ -15,7 +15,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
   quantity,
 }) => {
   return (
-    <div className="flex-shrink-0 w-[100px] bg-[#ECF0E7] rounded-2xl overflow-hidden shadow-lg snap-start p-2">
+    <div className="flex-shrink-0 w-[120px] bg-[#ECF0E7] rounded-xl overflow-hidden shadow-lg snap-start p-2">
       <div className="relative">
         <button
           onClick={() => {
@@ -26,12 +26,16 @@ export const MenuItem: React.FC<MenuItemProps> = ({
           <X className="w-3 h-3 text-gray-600" />
         </button>
         <div className="aspect-square w-full flex items-center justify-center rounded-xl mb-3 border border-gray-100">
-          <img src={image} alt={name} className="w-4/5 h-4/5 object-contain" />
+          <img
+            src={image}
+            alt={name}
+            className="w-100 h-100 object-contain rounded-xl"
+          />
         </div>
-        <h3 className="font-medium text-gray-800 text-xs mb-0.5 line-clamp-1">
+        <h3 className="font-medium text-gray-800 text-xs mb-0.5 line-clamp-2">
           {name}
         </h3>
-        <p className="text-orange-500 font-bold text-xs">${price}</p>
+        <p className="text-orange-500 font-bold text-xs">{price}</p>
         <div className="flex items-center justify-between mt-3 bg-gray-100/50 rounded-xl p-1.5">
           <button
             onClick={() => null}

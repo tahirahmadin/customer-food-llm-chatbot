@@ -59,7 +59,7 @@ export const DunkinOrderApp: React.FC = () => {
 
     try {
       const response = await chatService.queryMenu(
-        inputQueryTrim,
+        queryType === "MENU_QUERY" ? inputQueryTrim : input,
         serializedMemory
       );
 

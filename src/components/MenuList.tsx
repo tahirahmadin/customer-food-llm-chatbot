@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { RefreshCw, ShoppingBag } from "lucide-react";
 import { MenuItem } from "./MenuItem";
+import { menuItems } from "../data/menuData";
 
 interface MenuListProps {
   messageId: number;
@@ -8,18 +9,31 @@ interface MenuListProps {
 }
 
 export const MenuList: React.FC<MenuListProps> = ({ messageId, items }) => {
+  const filteredMenuItems = useMemo(() => {
+    // Create a map from the items array for quick lookup
+    const itemMap = new Map(items.map((item) => [item.id, item.quantity]));
+
+    console.log(itemMap);
+    // Filter menuItems and include the quantity from the items array
+    return menuItems
+      .filter((menuItem) => itemMap.has(menuItem.id.toString()))
+      .map((menuItem) => ({
+        ...menuItem,
+        quantity: itemMap.get(menuItem.id.toString()), // Add quantity to the result
+      }));
+  }, [items, menuItems]);
+
   return (
     <div className="mt-4 -mx-4">
       <div className="flex overflow-x-auto pb-4 px-4 gap-4 snap-x scrollbar-hide">
-        {items.map((meal, index) => (
+        {console.log(filteredMenuItems)}
+        {filteredMenuItems.map((meal, index) => (
           <MenuItem
             key={index}
             name={meal.name}
             price={meal.price}
-            image={
-              "https://static.vecteezy.com/system/resources/previews/034/468/048/non_2x/donuts-doughnut-donut-doughnuts-donuts-transparent-background-ai-generated-png.png"
-            }
-            quantity={2}
+            image={meal.image}
+            quantity={meal.quantity}
           />
         ))}
       </div>

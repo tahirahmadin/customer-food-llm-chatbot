@@ -15,15 +15,6 @@ export const Message: React.FC<MessageProps> = ({ message, onRetry }) => {
     message.text.toLowerCase().includes("error") ||
     message.text.toLowerCase().includes("sorry");
 
-  if (
-    message.queryType === "MENU_QUERY" &&
-    message.isBot &&
-    message.structuredText
-  ) {
-    console.log("message");
-    console.log(message);
-  }
-
   const handleRemoveCard = (messageId: number, cardId: number) => {};
 
   return (
@@ -66,23 +57,7 @@ export const Message: React.FC<MessageProps> = ({ message, onRetry }) => {
         {message.queryType === "MENU_QUERY" && !message.isBot && (
           <div>{message.text}</div>
         )}
-        {message.queryType != "MENU_QUERY" && message.isBot && (
-          <div>{message.text}</div>
-        )}
-        {/* {console.log("cleanMessage")}
-        {console.log(cleanMessage)} */}
-
-        {/* {message.image && (
-          <img
-            src={message.image}
-            alt="Uploaded"
-            className="max-w-full rounded-lg my-2"
-          />
-        )} */}
-
-        {message.mealCards && message.isBot && (
-          <div className="mt-4">{/* Render meal cards here if needed */}</div>
-        )}
+        {message.queryType != "MENU_QUERY" && <div>{message.text}</div>}
 
         <span className="text-xs text-gray-500 mt-1 block">{message.time}</span>
 
