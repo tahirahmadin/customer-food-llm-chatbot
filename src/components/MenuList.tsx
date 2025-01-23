@@ -54,7 +54,7 @@ export const MenuList: React.FC<MenuListProps> = ({ messageId, items }) => {
           className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-all shadow-sm"
         >
           <ShoppingBag className="w-4 h-4 mr-1" />
-          <span className="text-sm font-medium">$21 • Order</span>
+          <span className="text-sm font-medium">$21 • Cart total</span>
         </button>
       </div>
     </div>

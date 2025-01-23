@@ -7,9 +7,9 @@ import { useChatContext } from "../context/ChatContext";
 interface ChatPanelProps {
   input: string;
   setInput: (value: string) => void;
-  onSubmit: (e: React.FormEvent, serializedMemory: string) => void; 
+  onSubmit: (e: React.FormEvent, serializedMemory: string) => void;
   placeholder: string;
-} 
+}
 
 export const ChatPanel: React.FC<ChatPanelProps> = ({
   input,
@@ -32,9 +32,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   const serializedMemory = useMemo(() => {
     return state.messages
       .map((message) =>
-        message.isBot
-          ? `Bot: ${message.text}`
-          : `User: ${message.text}`
+        message.isBot ? `Bot: ${message.text}` : `User: ${message.text}`
       )
       .join("\n");
   }, [state.messages]);
@@ -48,6 +46,8 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
           message.isBot &&
           message.text
         ) {
+          console.log("normalText");
+          console.log(message.text);
           // Parse the text field into JSON
           const parsedText = JSON.parse(message.text);
 
